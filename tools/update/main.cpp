@@ -56,7 +56,7 @@ bool sendFile(const std::string& filename, int uart) {
     
     int sec = 3;
     while(sec) {
-        std::cout << "Transfer will begin in " << sec-- << "s" <<std::endl;
+        std::cout << "Update will begin in " << sec-- << "s" <<std::endl;
         sleep(1);
     }
     
@@ -85,7 +85,7 @@ bool sendFile(const std::string& filename, int uart) {
             std::cerr << "Error: Acknowledgment not received. Retrying..." << std::endl;
             return false;;
         } else {
-            std::cout << "Transfered " << ++currentPacket << "/" << totalPacket << std::endl;
+            std::cout << "Transfered " << currentPacket++ << "/" << totalPacket << std::endl;
         }
     }
     // Send End of Transmission (EOT)
@@ -138,7 +138,7 @@ int openUART(const std::string& device, speed_t baudRate) {
 
 int main() {
     std::string filename = "fsw"; // Replace with your file name
-    std::string device = "/dev/pts/5";
+    std::string device = "/dev/pts/14";
     speed_t baudRate = B921600;
     
     int uart = openUART(device, baudRate);

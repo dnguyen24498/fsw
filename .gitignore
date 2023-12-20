@@ -54,5 +54,8 @@ _deps
 
 fsw
 fsw_log.txt
+fsw_new
+fsw_update
+wip2pepu
 
 # End of https://www.toptal.com/developers/gitignore/api/c++,cmake

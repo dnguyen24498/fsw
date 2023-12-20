@@ -73,8 +73,8 @@ void SerialConnectivity::receive() {
         mReceiveQueue.push(Message::obtain(buff, bytesRead));
         mCondition.notify_one();
         
-        usleep(2000);
         dataAvailable = false;
+        usleep(2000);
     }
 }
 

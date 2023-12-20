@@ -6,9 +6,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -g -pthread -lrt -Wall -Wextr
 set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(LOG_DIRECTORY ${PROJECT_PATH}/build/fsw_log.txt)
-set(PORT_NAME /dev/pts/2)
+
+set(PORT_NAME /dev/pts/5)
 set(PORT_BAUDRATE 115200)
 set(UPDATE_PORT_BAUDRATE 921600)
+set(ENGINEERING_PORT_BAUDRATE 460800)
+
 set(FRAME_BUFFER_SIZE 1024)
 
 configure_file(

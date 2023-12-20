@@ -26,8 +26,8 @@ void Engineering::registerMessages() {
 }
 
 void Engineering::startEngineeringMode() {
-    if (mUart->open(PORT_NAME, PORT_BAUDRATE) != -1) {
-        LOG_INFO("%s ready to use with baudrate %d (Engineering Mode)", PORT_NAME, PORT_BAUDRATE);
+    if (mUart->open(PORT_NAME, ENGINEERING_PORT_BAUDRATE) != -1) {
+        LOG_INFO("%s ready to use with baudrate %d (Engineering Mode)", PORT_NAME, ENGINEERING_PORT_BAUDRATE);
         mEngineering = true;
         
         mThread = std::unique_ptr<std::thread>
@@ -42,8 +42,8 @@ void Engineering::receive() {
     struct timeval tvTimeout;
     fd_set fsRead;
     
-    tvTimeout.tv_sec = 0;
-    tvTimeout.tv_usec = 10000;
+    tvTimeout.tv_sec = 1;
+    tvTimeout.tv_usec = 0;
     
     uint8_t buff[FRAME_BUFFER_SIZE] = {0};
     bool dataAvailable = false;
@@ -106,6 +106,8 @@ void Engineering::receive() {
             mEngineeringBuffer.clear();
             mPrintPrefix = false;
         }
+        
+        dataAvailable = false;
     }
 }
 

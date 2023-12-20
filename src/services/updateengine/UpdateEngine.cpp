@@ -83,7 +83,6 @@ void UpdateEngine::receive() {
             else dataAvailable = true;
         }
         
-        
         XmodemPacket packet;
         ssize_t bytesRead = read(mUart->getFd(), reinterpret_cast<char*>(&packet), sizeof(XmodemPacket));
         
