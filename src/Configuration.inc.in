@@ -4,3 +4,4 @@
 #define PORT_NAME                       "@PORT_NAME@"
 #define PORT_BAUDRATE                   @PORT_BAUDRATE@
 #define FRAME_BUFFER_SIZE               @FRAME_BUFFER_SIZE@
+#define UPDATE_PORT_BAUDRATE            @UPDATE_PORT_BAUDRATE@

@@ -8,7 +8,7 @@
 #include <iostream>
 
 SerialConnectivity::SerialConnectivity(const std::string & name) 
- : Service(name), mReceiveThread(nullptr), mEngineering(true), mPrintPrefix(false),
+ : Service(name), mReceiveThread(nullptr), mIsNormalMode(true), mPrintPrefix(false),
  mTransmitThread(nullptr), mUart(std::make_unique<Uart>()) {
      
 }
@@ -20,8 +20,7 @@ SerialConnectivity::~SerialConnectivity() {
 void SerialConnectivity::init() {
     if (mUart->open(PORT_NAME, PORT_BAUDRATE) != -1) {
         LOG_INFO("%s ready to use with baudrate %d (Normal mode)", PORT_NAME, PORT_BAUDRATE);
-        mEngineering = false;
-        
+        mIsNormalMode = true;
         
         mReceiveThread = std::unique_ptr<std::thread>
             (new std::thread(&SerialConnectivity::receive, this));
@@ -54,7 +53,7 @@ void SerialConnectivity::receive() {
     uint8_t buff[FRAME_BUFFER_SIZE] = {0};
     bool dataAvailable = false;
     
-    while (!mEngineering) {
+    while (mIsNormalMode) {
         if (!dataAvailable) {
             FD_ZERO(&fsRead);
             FD_SET(mUart->getFd(), &fsRead);
@@ -75,11 +74,12 @@ void SerialConnectivity::receive() {
         mCondition.notify_one();
         
         usleep(2000);
+        dataAvailable = false;
     }
 }
 
 void SerialConnectivity::transmit() {
-    while (!mEngineering) {
+    while (mIsNormalMode) {
         std::unique_lock<std::mutex> lock(mLock);
         if (mReceiveQueue.empty() && mTransmitQueue.empty())
             mCondition.wait(lock);
@@ -88,11 +88,17 @@ void SerialConnectivity::transmit() {
             std::shared_ptr<Message> msg = mReceiveQueue.front();
             if (msg->id == MSG_START_ENGINEERING_MODE) {
                 LOG_INFO("Entering Engineering mode");
-                mEngineering = true;
+                mIsNormalMode = false;
                 mUart->close();
+            } else if (msg->id == MSG_START_UPDATE_MODE) {
+                LOG_INFO("Entering Update mode");
+                mIsNormalMode = false;
+                mUart->close();
+            } else {
+                mIsNormalMode = true;
             }
-            sendToHub(msg);
             
+            sendToHub(msg);
             mReceiveQueue.pop();   
         }
         
@@ -104,7 +110,6 @@ void SerialConnectivity::transmit() {
             msg->getRaw(buff, len);
             
             if (len > 0) mUart->write(buff, len);
-            
             mTransmitQueue.pop();
         }
         

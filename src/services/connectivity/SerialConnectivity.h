@@ -30,6 +30,6 @@ private:
     std::queue<std::shared_ptr<Message>> mReceiveQueue;
     std::queue<std::shared_ptr<Message>> mTransmitQueue;
     mutable std::mutex mLock;
-    bool mEngineering;
+    bool mIsNormalMode;
     bool mPrintPrefix;
 };
