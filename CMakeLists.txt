@@ -7,10 +7,12 @@ set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(LOG_DIRECTORY ${PROJECT_PATH}/build/fsw_log.txt)
 
-set(PORT_NAME /dev/pts/5)
+set(BINARY_PATH ${PROJECT_PATH}/build/fsw)
+
+set(PORT_NAME /dev/virtualcom0)
 set(PORT_BAUDRATE 115200)
-set(UPDATE_PORT_BAUDRATE 921600)
 set(ENGINEERING_PORT_BAUDRATE 460800)
+set(UPDATE_PORT_BAUDRATE 921600)
 
 set(FRAME_BUFFER_SIZE 1024)
 
@@ -22,6 +24,11 @@ configure_file(
 configure_file(
     ${PROJECT_PATH}/src/Configuration.inc.in
     ${PROJECT_PATH}/src/Configuration.inc @ONLY
+)
+
+configure_file(
+    ${PROJECT_PATH}/files/fsw.service.in
+    ${PROJECT_PATH}/files/fsw.service @ONLY
 )
 
 include_directories(

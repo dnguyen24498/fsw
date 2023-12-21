@@ -36,7 +36,7 @@ void SerialConnectivity::init() {
 
 void SerialConnectivity::registerMessages() {
     // Register messages
-    ServiceHub::getInstance()->registerMessage(MSG_TX_SERIAL, 
+    ServiceHub::getInstance()->registerMessage(MSG_TEST_REPONSE, 
         std::dynamic_pointer_cast<Service>(shared_from_this()));
         
     ServiceHub::getInstance()->registerMessage(MSG_START_NORMAL_MODE, 
@@ -48,7 +48,7 @@ void SerialConnectivity::receive() {
     fd_set fsRead;
     
     tvTimeout.tv_sec = 0;
-    tvTimeout.tv_usec = 10000;
+    tvTimeout.tv_usec = 2000;
     
     uint8_t buff[FRAME_BUFFER_SIZE] = {0};
     bool dataAvailable = false;
@@ -70,11 +70,10 @@ void SerialConnectivity::receive() {
         
         if (bytesRead < 1) continue;
         
-        mReceiveQueue.push(Message::obtain(buff, bytesRead));
+        mReceiveQueue.push(Message::obtainAutoMapId(buff, bytesRead));
         mCondition.notify_one();
         
         dataAvailable = false;
-        usleep(2000);
     }
 }
 
@@ -112,8 +111,6 @@ void SerialConnectivity::transmit() {
             if (len > 0) mUart->write(buff, len);
             mTransmitQueue.pop();
         }
-        
-        usleep(2000);
     }
 }
 
@@ -123,7 +120,7 @@ void SerialConnectivity::handleMessage(std::shared_ptr<Message> &message) {
             init();
             break;
             
-        case MSG_TX_SERIAL:
+        case MSG_TEST_REPONSE:
             mTransmitQueue.push(message);
             mCondition.notify_one();
             break;

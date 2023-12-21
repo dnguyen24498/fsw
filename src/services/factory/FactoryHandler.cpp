@@ -16,13 +16,13 @@ void FactoryHandler::init() {
 }
 
 void FactoryHandler::registerMessages() {
-    ServiceHub::getInstance()->registerMessage(MSG_RX_SERIAL,
+    ServiceHub::getInstance()->registerMessage(MSG_TEST_REQUEST,
         std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
 
 void FactoryHandler::handleMessage(std::shared_ptr<Message> &message) {
     switch (message->id) {
-        case MSG_RX_SERIAL:
+        case MSG_TEST_REQUEST:
             // parse message
             LOG_INFO("Receive rx message from UART");
             break;

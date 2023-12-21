@@ -47,7 +47,7 @@ bool sendFile(const std::string& filename, int uart) {
     std::ifstream file(filename, std::ios::binary);
     
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open file " << filename << std::endl;
+        std::cerr << "\r" << "Error: Could not open file " << filename << std::endl;
         return false;
     }
     
@@ -56,7 +56,7 @@ bool sendFile(const std::string& filename, int uart) {
     
     int sec = 3;
     while(sec) {
-        std::cout << "Update will begin in " << sec-- << "s" <<std::endl;
+        std::cout << "\r" << "Update will begin in " << sec-- << "s" << std::flush;
         sleep(1);
     }
     
@@ -82,10 +82,10 @@ bool sendFile(const std::string& filename, int uart) {
         char ack;
         read(uart, &ack, 1);
         if (ack != ACK) {
-            std::cerr << "Error: Acknowledgment not received. Retrying..." << std::endl;
+            std::cerr << "\r" << "Error: Acknowledgment not received. Retrying..." << std::flush;
             return false;;
         } else {
-            std::cout << "Transfered " << currentPacket++ << "/" << totalPacket << std::endl;
+            std::cout << "\r" << "Transferring " << currentPacket++ << "/" << totalPacket << " packets" << std::flush;
         }
     }
     // Send End of Transmission (EOT)
@@ -93,7 +93,7 @@ bool sendFile(const std::string& filename, int uart) {
     
     file.close();
     
-    std::cout << "File transmission complete." << std::endl;
+    std::cout << std::endl;
     
     return true;
 }
@@ -138,7 +138,7 @@ int openUART(const std::string& device, speed_t baudRate) {
 
 int main() {
     std::string filename = "fsw"; // Replace with your file name
-    std::string device = "/dev/pts/14";
+    std::string device = "/dev/virtualcom1";
     speed_t baudRate = B921600;
     
     int uart = openUART(device, baudRate);
@@ -148,9 +148,9 @@ int main() {
     }
 
     if (sendFile(filename, uart)) {
-        std::cout << "File sent successfully." << std::endl;
+        std::cout << "\r" << "File sent successfully." << std::endl;
     } else {
-        std::cout << "Failed to send file." << std::endl;
+        std::cout << "\r" << "Failed to send file." << std::endl;
     }
     
     close(uart);

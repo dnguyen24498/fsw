@@ -7,7 +7,7 @@ Message::Message()
 Message::~Message() {
 }
 
-std::shared_ptr<Message> Message::obtain(uint8_t *data, uint32_t len) {
+std::shared_ptr<Message> Message::obtainAutoMapId(uint8_t *data, uint32_t len) {
     std::shared_ptr<Message> m = std::make_shared<Message>();
     
     if (len >= STD_MIN_LEN) {
@@ -32,6 +32,13 @@ std::shared_ptr<Message> Message::obtain(const message_id &id, const std::string
     
     m->id = id;
     m->append(data);
+    
+    return m;
+}
+
+std::shared_ptr<Message> Message::obtain(const message_id &id) {
+    std::shared_ptr<Message> m = std::make_shared<Message>();
+    m->id = id;
     
     return m;
 }

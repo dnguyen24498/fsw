@@ -1,0 +1,15 @@
+[Unit]
+Description=Factory Software
+Wants=dbus.service
+After=dbus.service
+ConditionVirtualization=!container
+DefaultDependencies=yes
+
+[Service]
+Type=simple
+ExecStart=/home/ubuntu/environment/fsw/build/fsw
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=sysinit.target

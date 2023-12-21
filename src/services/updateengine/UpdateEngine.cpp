@@ -27,7 +27,8 @@ void UpdateEngine::registerMessages() {
 
 void UpdateEngine::startUpdateMode() {
     if (mUart->open(PORT_NAME, UPDATE_PORT_BAUDRATE) != -1) {
-        LOG_INFO("%s ready to use with baudrate %d (Update Mode)", PORT_NAME, UPDATE_PORT_BAUDRATE);
+        LOG_INFO("%s ready to use with baudrate %d (Update Mode)", 
+            PORT_NAME, UPDATE_PORT_BAUDRATE);
         
         mThread = std::unique_ptr<std::thread>
             (new std::thread(&UpdateEngine::receive, this));
@@ -49,16 +50,13 @@ char UpdateEngine::calculateChecksum(const XmodemPacket &packet) {
 }
 
 void UpdateEngine::receive() {
-    mUart->write("\n\r***************************************************************\n\r");
-    mUart->write("*             If you see this message, it means               *\n\r");
-    mUart->write("*             that you are in update mode                     *\n\r");
-    mUart->write("***************************************************************\n\r");
-    
+    // Remove the old file if exsist
     std::remove("fsw_new");
+    
     std::ofstream outputFile("fsw_new", std::ios::binary);
     
     if (!outputFile.is_open()) {
-        LOG_INFO("Error: Could not open output file");
+        LOG_INFO("Could not open output file");
         return;
     }
     
@@ -66,7 +64,7 @@ void UpdateEngine::receive() {
     fd_set fsRead;
     
     tvTimeout.tv_sec = 0;
-    tvTimeout.tv_usec = 10000;
+    tvTimeout.tv_usec = 2000;
     
     bool dataAvailable = false;
     
@@ -84,13 +82,19 @@ void UpdateEngine::receive() {
         }
         
         XmodemPacket packet;
-        ssize_t bytesRead = read(mUart->getFd(), reinterpret_cast<char*>(&packet), sizeof(XmodemPacket));
+        ssize_t bytesRead = read(mUart->getFd(), 
+            reinterpret_cast<char*>(&packet), sizeof(XmodemPacket));
         
         if (bytesRead < 1) continue;
         
         if (packet.header == EOT) {
             // End of Transmision
-            LOG_INFO("File transmission compelete");
+            LOG_INFO("Update completed, reboot the device to take effect");
+            
+            // Replace binary
+            std::remove("fsw");
+            std::rename("fsw_new", "fsw");
+            
             break;
         }
         
@@ -101,6 +105,7 @@ void UpdateEngine::receive() {
             // Send acknowledgment to the transmitter
             write(mUart->getFd(), &ACK, 1);
             outputFile.write(packet.data, PACKET_SIZE);
+            
             dataAvailable = false;
         } else {
             // Send negative acknowledgment to the transmitter
@@ -109,15 +114,14 @@ void UpdateEngine::receive() {
             break;
         }
         
-        usleep(2000);
+        //usleep(2000);
     }
     
     outputFile.close();
     mUart->close();
     
-    std::shared_ptr<Message> msg = std::make_shared<Message>();
-    msg->id = MSG_START_NORMAL_MODE;
-    sendToHub(msg);
+    std::shared_ptr<Message> out = Message::obtain(MSG_START_NORMAL_MODE);
+    sendToHub(out);
 }
 
 void UpdateEngine::handleMessage(std::shared_ptr<Message> &message) {

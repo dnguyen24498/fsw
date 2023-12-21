@@ -42,8 +42,8 @@ void Engineering::receive() {
     struct timeval tvTimeout;
     fd_set fsRead;
     
-    tvTimeout.tv_sec = 1;
-    tvTimeout.tv_usec = 0;
+    tvTimeout.tv_sec = 0;
+    tvTimeout.tv_usec = 2000;
     
     uint8_t buff[FRAME_BUFFER_SIZE] = {0};
     bool dataAvailable = false;
