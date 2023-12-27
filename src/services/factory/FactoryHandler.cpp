@@ -15,7 +15,7 @@ void FactoryHandler::init() {
     
 }
 
-void FactoryHandler::registerMessages() {
+void FactoryHandler::registerMessage() {
     ServiceHub::getInstance()->registerMessage(MSG_TEST_REQUEST,
         std::dynamic_pointer_cast<Service>(shared_from_this()));
 }

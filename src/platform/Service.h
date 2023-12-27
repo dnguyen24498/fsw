@@ -28,14 +28,14 @@ protected:
     void destroy();
     void sendToHub(std::shared_ptr<Message> &message);
     virtual void loop();
-    virtual void registerMessages();
+    virtual void registerMessage();
     
 protected:
-    std::unique_ptr<std::thread> mThread;
     std::string mName;
     volatile bool always;
     mutable std::mutex mLock;
     std::condition_variable mCondition;
+    std::unique_ptr<std::thread> mThread;
     std::queue<std::shared_ptr<Message>> mMessageQueue;
 
     friend class ServiceHub;

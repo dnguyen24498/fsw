@@ -26,10 +26,19 @@ void ServiceHub::start() {
         }
         
         std::shared_ptr<Message> msg = mMessageQueue.front();
-        LOG_INFO("Broadcast message %d", msg->id);
-        mMessageQueue.pop();
         
-        this->broadcast(msg);
+        if (mMessageRegistrant.find(msg->id) != mMessageRegistrant.end()) {
+            for (auto service : mMessageRegistrant[msg->id]) {
+                // Send to all registrants
+                if (mServiceMap.find(service) != mServiceMap.end()) {
+                    LOG_INFO("Send message %d from %s to %s", msg->id, msg->sender->getName().c_str(), service.c_str());
+                    mServiceMap[service]->receive(msg);
+                } else {
+                    LOG_ERROR("Message %d doesn't belong to any targets -> aborted", msg->id);
+                }
+            }
+        }
+        mMessageQueue.pop();
     }
 }
 
@@ -38,7 +47,7 @@ void ServiceHub::add(const std::shared_ptr<Service> &service) {
         LOG_INFO("%s service was plugged", service->getName().c_str());
         mServiceMap[service->getName()] = service;
         mServiceMap[service->getName()]->init();
-        mServiceMap[service->getName()]->registerMessages();
+        mServiceMap[service->getName()]->registerMessage();
         mServiceMap[service->getName()]->run();
     }
 }
@@ -61,17 +70,4 @@ void ServiceHub::registerMessage(message_id id, const std::shared_ptr<Service> &
     auto it = std::find(mMessageRegistrant[id].begin(), mMessageRegistrant[id].end(), service->getName());
     if (it == mMessageRegistrant[id].end())
         mMessageRegistrant[id].push_back(service->getName());
-}
-
-void ServiceHub::broadcast(std::shared_ptr<Message> &message) {
-    if (mMessageRegistrant.find(message->id) != mMessageRegistrant.end()) {
-        for (auto s : mMessageRegistrant[message->id]) {
-            // Send to all registrants
-            if (mServiceMap.find(s) != mServiceMap.end()) {
-                mServiceMap[s]->receive(message);
-            } else {
-                LOG_ERROR("Message doesn't belong to any targets -> aborted");
-            }
-        }
-    }
 }

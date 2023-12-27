@@ -9,6 +9,6 @@ public:
     
 private:
     void init() override;
-    void registerMessages() override;
+    void registerMessage() override;
     void handleMessage(std::shared_ptr<Message> &message) override;
 };

@@ -20,7 +20,7 @@ void UpdateEngine::init() {
     
 }
 
-void UpdateEngine::registerMessages() {
+void UpdateEngine::registerMessage() {
     ServiceHub::getInstance()->registerMessage(MSG_START_UPDATE_MODE,
         std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
@@ -120,7 +120,7 @@ void UpdateEngine::receive() {
     outputFile.close();
     mUart->close();
     
-    std::shared_ptr<Message> out = Message::obtain(MSG_START_NORMAL_MODE);
+    std::shared_ptr<Message> out = Message::obtain(shared_from_this(), MSG_START_NORMAL_MODE);
     sendToHub(out);
 }
 

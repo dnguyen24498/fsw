@@ -11,6 +11,7 @@
 #include <vector>
 
 class Service;
+class Message;
 
 class ServiceHub final {
 public:
@@ -28,8 +29,6 @@ public:
 private:
     ServiceHub();
     virtual ~ServiceHub();
-    
-    void broadcast(std::shared_ptr<Message> &message);
     
 private:
     static ServiceHub* mInstance;

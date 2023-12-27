@@ -18,8 +18,8 @@ SerialConnectivity::~SerialConnectivity() {
 }
 
 void SerialConnectivity::init() {
-    if (mUart->open(PORT_NAME, PORT_BAUDRATE) != -1) {
-        LOG_INFO("%s ready to use with baudrate %d (Normal mode)", PORT_NAME, PORT_BAUDRATE);
+    if (mUart->open(PORT_NAME, NORMAL_PORT_BAUDRATE) != -1) {
+        LOG_INFO("%s ready to use with baudrate %d (Normal mode)", PORT_NAME, NORMAL_PORT_BAUDRATE);
         mIsNormalMode = true;
         
         mReceiveThread = std::unique_ptr<std::thread>
@@ -34,7 +34,7 @@ void SerialConnectivity::init() {
     }
 }
 
-void SerialConnectivity::registerMessages() {
+void SerialConnectivity::registerMessage() {
     // Register messages
     ServiceHub::getInstance()->registerMessage(MSG_TEST_REPONSE, 
         std::dynamic_pointer_cast<Service>(shared_from_this()));
@@ -70,7 +70,7 @@ void SerialConnectivity::receive() {
         
         if (bytesRead < 1) continue;
         
-        mReceiveQueue.push(Message::obtainAutoMapId(buff, bytesRead));
+        mReceiveQueue.push(Message::obtainAutoMapId(shared_from_this(), buff, bytesRead));
         mCondition.notify_one();
         
         dataAvailable = false;
@@ -105,9 +105,7 @@ void SerialConnectivity::transmit() {
             uint8_t buff[FRAME_BUFFER_SIZE] = {0};
             uint32_t len = 0;
             
-            std::shared_ptr<Message> msg = mTransmitQueue.front();
-            msg->getRaw(buff, len);
-            
+            mTransmitQueue.front()->getRaw(buff, len);
             if (len > 0) mUart->write(buff, len);
             mTransmitQueue.pop();
         }

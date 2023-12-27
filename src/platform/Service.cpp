@@ -24,9 +24,9 @@ int32_t Service::run() {
 }
 
 void Service::destroy() {
+    always = false;
     mCondition.notify_one();
     
-    always = false;
     if (mThread->joinable())
         mThread->join();
 }
@@ -46,7 +46,7 @@ void Service::init() {
     
 }
 
-void Service::registerMessages() {
+void Service::registerMessage() {
     
 }
 

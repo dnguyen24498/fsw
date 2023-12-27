@@ -31,9 +31,12 @@ void registerSignal(void) {
     for (int i = 1; i <= NSIG; i++)
         signal(i, [](int signum) {
             LOG_ERROR("Signal received: %d - %s", signum, strsignal(signum));
-            LOG_ERROR("========================= Crashed here =========================");
+            if (signum != SIGINT && signum != SIGCHLD) {
+                LOG_ERROR("========================= Crashed here =========================");
+            }
+            
             signal(signum, SIG_DFL);
-            raise(signum);
+            raise(signum);   
     });
 }
 

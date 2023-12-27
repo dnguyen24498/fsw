@@ -12,7 +12,7 @@ Engineering::Engineering(const std::string &name)
     
 }
 
-Engineering::~Engineering() {
+Engineering::~Engineering() {   
     mUart->close();
 }
 
@@ -20,7 +20,7 @@ void Engineering::init() {
     
 }
 
-void Engineering::registerMessages() {
+void Engineering::registerMessage() {
     ServiceHub::getInstance()->registerMessage(MSG_START_ENGINEERING_MODE,
         std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
@@ -119,8 +119,7 @@ void Engineering::executeCommand(const std::string &command) {
         mEngineering = false;
         mUart->close();
         
-        std::shared_ptr<Message> msg = std::make_shared<Message>();
-        msg->id = MSG_START_NORMAL_MODE;
+        std::shared_ptr<Message> msg = Message::obtain(shared_from_this(), MSG_START_NORMAL_MODE);
         sendToHub(msg);
         
         return;
