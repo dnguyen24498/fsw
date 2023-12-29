@@ -1,8 +1,0 @@
-#pragma once
-
-#define LOG_DIRECTORY                   "@LOG_DIRECTORY@"
-#define PORT_NAME                       "@PORT_NAME@"
-#define FRAME_BUFFER_SIZE               @FRAME_BUFFER_SIZE@
-#define NORMAL_PORT_BAUDRATE            @NORMAL_PORT_BAUDRATE@
-#define UPDATE_PORT_BAUDRATE            @UPDATE_PORT_BAUDRATE@
-#define ENGINEERING_PORT_BAUDRATE       @ENGINEERING_PORT_BAUDRATE@

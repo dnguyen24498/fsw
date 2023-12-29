@@ -1,7 +1,7 @@
 #include "UpdateEngine.h"
 #include "ServiceHub.h"
 #include "Log.h"
-#include "Configuration.inc"
+#include "Configuration.h"
 
 #include <unistd.h>
 #include <iostream>

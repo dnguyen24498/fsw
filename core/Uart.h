@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Configuration.inc"
+#include "Configuration.h"
 
 #include <stdint.h>
 #include <string>

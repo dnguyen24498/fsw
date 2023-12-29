@@ -1,6 +1,6 @@
 #include "SerialConnectivity.h"
 #include "Log.h"
-#include "Configuration.inc"
+#include "Configuration.h"
 #include "ServiceHub.h"
 #include "MessageTable.h"
 

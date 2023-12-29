@@ -1,6 +1,6 @@
 #pragma once
 
-#define LOG_DIRECTORY                   "/home/ubuntu/environment/fsw/build/fsw_log.txt"
+#define LOG_DIRECTORY                   "/home/ubuntu/environment/fsw/fsw_log.txt"
 #define PORT_NAME                       "/dev/virtualcom0"
 #define FRAME_BUFFER_SIZE               1024
 #define NORMAL_PORT_BAUDRATE            115200

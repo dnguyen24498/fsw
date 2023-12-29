@@ -1,7 +1,7 @@
 #include "Log.h"
 #include "File.h"
 #include "Time.h"
-#include "Configuration.inc"
+#include "Configuration.h"
 
 #include <iostream>
 #include <stdarg.h>
