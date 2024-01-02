@@ -8,8 +8,13 @@
 #include <fstream>
 #include <termios.h>
 
-UpdateEngine::UpdateEngine(const std::string &name)
- : Service(name), mUart(std::make_unique<Uart>()) {
+extern "C" void __init__(ServiceHub *hub) {
+    std::shared_ptr<UpdateEngine> service = std::make_shared<UpdateEngine>("UpdateEngine", hub);
+    service->plug();
+}
+
+UpdateEngine::UpdateEngine(const std::string &name, ServiceHub *hub)
+ : Service(name, hub), mUart(std::make_unique<Uart>()) {
  }
  
 UpdateEngine::~UpdateEngine() {
@@ -21,7 +26,7 @@ void UpdateEngine::init() {
 }
 
 void UpdateEngine::registerMessage() {
-    ServiceHub::getInstance()->registerMessage(MSG_START_UPDATE_MODE,
+    mServiceHub->registerMessage(MSG_START_UPDATE_MODE,
         std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
 

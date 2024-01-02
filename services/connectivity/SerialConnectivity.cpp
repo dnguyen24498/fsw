@@ -7,10 +7,15 @@
 #include <unistd.h>
 #include <iostream>
 
-SerialConnectivity::SerialConnectivity(const std::string & name) 
- : Service(name), mReceiveThread(nullptr), mIsNormalMode(true), mPrintPrefix(false),
+extern "C" void __init__(ServiceHub *hub) {
+    std::shared_ptr<SerialConnectivity> service = std::make_shared<SerialConnectivity>("SerialConnectivity", hub);
+    service->plug();
+}
+
+SerialConnectivity::SerialConnectivity(const std::string &name, ServiceHub *hub) 
+ : Service(name, hub), mReceiveThread(nullptr), mIsNormalMode(true), mPrintPrefix(false),
  mTransmitThread(nullptr), mUart(std::make_unique<Uart>()) {
-     
+    
 }
 
 SerialConnectivity::~SerialConnectivity() {
@@ -36,10 +41,10 @@ void SerialConnectivity::init() {
 
 void SerialConnectivity::registerMessage() {
     // Register messages
-    ServiceHub::getInstance()->registerMessage(MSG_TEST_REPONSE, 
+    mServiceHub->registerMessage(MSG_TEST_REPONSE, 
         std::dynamic_pointer_cast<Service>(shared_from_this()));
         
-    ServiceHub::getInstance()->registerMessage(MSG_START_NORMAL_MODE, 
+    mServiceHub->registerMessage(MSG_START_NORMAL_MODE, 
         std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
 

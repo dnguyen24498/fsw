@@ -21,7 +21,7 @@ struct XmodemPacket {
 
 class UpdateEngine final : public Service {
 public:
-    UpdateEngine(const std::string &name);
+    UpdateEngine(const std::string &name, ServiceHub *hub);
     virtual ~UpdateEngine();
 
 private:

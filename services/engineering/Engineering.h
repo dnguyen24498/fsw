@@ -7,7 +7,7 @@
 
 class Engineering final : public Service {
 public:
-    Engineering(const std::string &name);
+    Engineering(const std::string &name, ServiceHub *hub);
     virtual ~Engineering();
 private:
     void init() override;

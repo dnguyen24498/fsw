@@ -6,8 +6,14 @@
 #include <unistd.h>
 #include <iostream>
 
-Engineering::Engineering(const std::string &name)
-    : Service(name), mUart(std::make_unique<Uart>()), 
+
+extern "C" void __init__(ServiceHub *hub) {
+    std::shared_ptr<Engineering> service = std::make_shared<Engineering>("Engineering", hub);
+    service->plug();
+}
+
+Engineering::Engineering(const std::string &name, ServiceHub *hub)
+    : Service(name, hub), mUart(std::make_unique<Uart>()), 
     mEngineering(false), mPrintPrefix(false), mThread(nullptr) {
     
 }
@@ -21,7 +27,7 @@ void Engineering::init() {
 }
 
 void Engineering::registerMessage() {
-    ServiceHub::getInstance()->registerMessage(MSG_START_ENGINEERING_MODE,
+    mServiceHub->registerMessage(MSG_START_ENGINEERING_MODE,
         std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
 

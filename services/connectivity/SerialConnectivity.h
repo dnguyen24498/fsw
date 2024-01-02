@@ -12,7 +12,7 @@
 
 class SerialConnectivity final : public Service {
 public:
-    SerialConnectivity(const std::string &name);
+    SerialConnectivity(const std::string &name, ServiceHub *hub);
     virtual ~SerialConnectivity();
 
 private:

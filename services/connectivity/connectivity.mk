@@ -1,11 +1,8 @@
 FSW_CONNECTIVITY_LIB_SRCS := $(wildcard services/connectivity/*.cpp)
 FSW_CONNECTIVITY_LIB_OBJS := $(FSW_CONNECTIVITY_LIB_SRCS:.cpp=.o)
 
-EXPORT_HEADERS += services/connectivity/SerialConnectivity.h
-
-libfswconnectivity.a: $(FSW_CONNECTIVITY_LIB_OBJS)
-	ar rcs $(BUILD_ROOT)/$@ $^ $(FSW_CORE_LIB_OBJS)
+fswconnectivity.fo: $(FSW_CONNECTIVITY_LIB_OBJS)
+	$(CXX) -shared -o $(BUILD_ROOT)/$@ $^ $(FSW_CORE_LIB_OBJS)
 	
 services/connectivity/%.o: services/connectivity/%.cpp
-	$(CXX) $(CXXFLAGS) -DLOG_FILE -c $< -o $@ -I$(BUILD_INCLUDE)
-
+	$(CXX) -c -fPIC -o $@ $< -I$(BUILD_INCLUDE)
