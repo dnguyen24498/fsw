@@ -1,3 +1,5 @@
+#include "Uart.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -14,8 +16,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <sys/ioctl.h>
-
-#include "Uart.h"
 
 Uart::Uart() : mFd(-1) {
 }

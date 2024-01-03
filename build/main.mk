@@ -1,13 +1,23 @@
 TARGET := fsw
 
+PROJECT_VERSION_MAJOR := 1
+PROJECT_VERSION_MINOR := 0
+PROJECT_VERSION_PATCH := 1
+
 BUILD_ROOT := build/out
 BUILD_INCLUDE := build/include
+DEFAULT_CONFIG := /home/ubuntu/environment/fsw/.config
 
 FSW_SRCS := $(wildcard init/*.cpp)
 FSW_OBJS := $(FSW_SRCS:.cpp=.o)
 
 CXX := g++
-CXXFLAGS := -std=c++14 -Wall -Wextra -pthread -g -ldl -L$(BUILD_ROOT)
+CXXFLAGS := \
+	-std=c++14 -Wall -Wextra -pthread -g -ldl \
+	-DDEFAULT_CONFIG=$(DEFAULT_CONFIG) \
+	-DPROJECT_VERSION_MAJOR=$(PROJECT_VERSION_MAJOR) \
+	-DPROJECT_VERSION_MINOR=$(PROJECT_VERSION_MINOR) \
+	-DPROJECT_VERSION_PATCH=$(PROJECT_VERSION_PATCH)
 
 EXPORT_HEADERS :=
 IMPORT_SERVICES :=

@@ -1,11 +1,14 @@
 #include "Engineering.h"
 #include "ServiceHub.h"
 #include "Log.h"
-#include "Configuration.h"
+#include "ConfigStore.h"
 
 #include <unistd.h>
 #include <iostream>
 
+std::string PORT_NAME = ConfigStore::getInstance()->getString("PORT_NAME");
+int ENGINEERING_PORT_BAUDRATE = ConfigStore::getInstance()->getInt("ENGINEERING_PORT_BAUDRATE");
+int FRAME_BUFFER_SIZE = ConfigStore::getInstance()->getInt("FRAME_BUFFER_SIZE");
 
 extern "C" void __init__(ServiceHub *hub) {
     std::shared_ptr<Engineering> service = std::make_shared<Engineering>("Engineering", hub);
@@ -32,15 +35,15 @@ void Engineering::registerMessage() {
 }
 
 void Engineering::startEngineeringMode() {
-    if (mUart->open(PORT_NAME, ENGINEERING_PORT_BAUDRATE) != -1) {
-        LOG_INFO("%s ready to use with baudrate %d (Engineering Mode)", PORT_NAME, ENGINEERING_PORT_BAUDRATE);
+    if (mUart->open(PORT_NAME.c_str(), ENGINEERING_PORT_BAUDRATE) != -1) {
+        LOG_INFO("Serial port %s opened (Engineering)", PORT_NAME.c_str());
         mEngineering = true;
         
         mThread = std::unique_ptr<std::thread>
             (new std::thread(&Engineering::receive, this));
         mThread->detach();
     } else {
-        LOG_ERROR("Fail to open %s", PORT_NAME);
+        LOG_ERROR("Fail to open %s", PORT_NAME.c_str());
     }
 }
 

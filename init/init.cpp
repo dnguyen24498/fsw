@@ -1,7 +1,6 @@
-#include "Version.h"
 #include "Log.h"
 #include "ServiceHub.h"
-#include "Configuration.h"
+#include "ConfigStore.h"
 
 #include <dlfcn.h>
 #include <dirent.h>
@@ -20,7 +19,7 @@ typedef void (*DestroyServicePtr)();
 
 void init() {
     std::vector<std::string> fos;
-    std::string directory(FO_DIRECTORY);
+    std::string directory(ConfigStore::getInstance()->getString("FO_DIR"));
     
     DIR* dir = opendir(directory.c_str());
     
@@ -35,7 +34,8 @@ void init() {
         if (entry->d_type == DT_REG) {  // Check if it is a regular file
             std::string filename = entry->d_name;
             size_t extPos = filename.find_last_of(".");
-            if (extPos != std::string::npos && filename.substr(extPos) == FO_EXTENSION) {
+            if (extPos != std::string::npos && filename.substr(extPos) 
+                == ConfigStore::getInstance()->getString("FO_EXTENSION")) {
                 fos.push_back(directory + '/' + filename);
             }
         }
@@ -85,7 +85,8 @@ int main() {
         Log::getInstance()->registerService(std::make_shared<Logger>());
     #endif
  
-    LOG_INFO("Version: %s", PROJECT_VERSION_STRING);
+    LOG_INFO("Version: %d.%d.%d", PROJECT_VERSION_MAJOR, 
+        PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
     
     registerSignal();
     enableCoreDump();

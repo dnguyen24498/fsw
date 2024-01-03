@@ -1,12 +1,16 @@
 #include "UpdateEngine.h"
 #include "ServiceHub.h"
 #include "Log.h"
-#include "Configuration.h"
+#include "ConfigStore.h"
 
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
 #include <termios.h>
+
+std::string PORT_NAME = ConfigStore::getInstance()->getString("PORT_NAME");
+int UPDATE_PORT_BAUDRATE = ConfigStore::getInstance()->getInt("UPDATE_PORT_BAUDRATE");
+int FRAME_BUFFER_SIZE = ConfigStore::getInstance()->getInt("FRAME_BUFFER_SIZE");
 
 extern "C" void __init__(ServiceHub *hub) {
     std::shared_ptr<UpdateEngine> service = std::make_shared<UpdateEngine>("UpdateEngine", hub);
@@ -31,15 +35,14 @@ void UpdateEngine::registerMessage() {
 }
 
 void UpdateEngine::startUpdateMode() {
-    if (mUart->open(PORT_NAME, UPDATE_PORT_BAUDRATE) != -1) {
-        LOG_INFO("%s ready to use with baudrate %d (Update Mode)", 
-            PORT_NAME, UPDATE_PORT_BAUDRATE);
+    if (mUart->open(PORT_NAME.c_str(), UPDATE_PORT_BAUDRATE) != -1) {
+         LOG_INFO("Serial port %s opened (Update)", PORT_NAME.c_str());
         
         mThread = std::unique_ptr<std::thread>
             (new std::thread(&UpdateEngine::receive, this));
         mThread->detach();
     } else {
-        LOG_ERROR("Fail to open %s", PORT_NAME);
+        LOG_ERROR("Fail to open %s", PORT_NAME.c_str());
     }
 }
 

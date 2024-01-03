@@ -1,11 +1,15 @@
 #include "SerialConnectivity.h"
 #include "Log.h"
-#include "Configuration.h"
+#include "ConfigStore.h"
 #include "ServiceHub.h"
 #include "MessageTable.h"
 
 #include <unistd.h>
 #include <iostream>
+
+std::string PORT_NAME = ConfigStore::getInstance()->getString("PORT_NAME");
+int NORAL_PORT_BAUDRATE = ConfigStore::getInstance()->getInt("NORMAL_PORT_BAUDRATE");
+int FRAME_BUFFER_SIZE = ConfigStore::getInstance()->getInt("FRAME_BUFFER_SIZE");
 
 extern "C" void __init__(ServiceHub *hub) {
     std::shared_ptr<SerialConnectivity> service = std::make_shared<SerialConnectivity>("SerialConnectivity", hub);
@@ -23,8 +27,8 @@ SerialConnectivity::~SerialConnectivity() {
 }
 
 void SerialConnectivity::init() {
-    if (mUart->open(PORT_NAME, NORMAL_PORT_BAUDRATE) != -1) {
-        LOG_INFO("%s ready to use with baudrate %d (Normal mode)", PORT_NAME, NORMAL_PORT_BAUDRATE);
+    if (mUart->open(PORT_NAME.c_str(), NORAL_PORT_BAUDRATE) != -1) {
+        LOG_INFO("Serial port %s opened (Normal)", PORT_NAME.c_str());
         mIsNormalMode = true;
         
         mReceiveThread = std::unique_ptr<std::thread>
@@ -35,7 +39,7 @@ void SerialConnectivity::init() {
             (new std::thread(&SerialConnectivity::transmit, this));
         mTransmitThread->detach();
     } else {
-        LOG_ERROR("Fail to open %s", PORT_NAME);
+        LOG_ERROR("Fail to open %s port", PORT_NAME.c_str());
     }
 }
 

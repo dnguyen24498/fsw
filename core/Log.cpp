@@ -1,7 +1,7 @@
 #include "Log.h"
 #include "File.h"
 #include "Time.h"
-#include "Configuration.h"
+#include "ConfigStore.h"
 
 #include <iostream>
 #include <stdarg.h>
@@ -58,7 +58,7 @@ void Log::out(LogLevel lv, const char* format, ...) noexcept
     else                            tag = "[F]";
 
     ss << "[" << utils::time::now() << "]" << "[" << std::to_string(getpid()) << "]" << tag << buf << '\n';
-    utils::file::write(LOG_DIRECTORY, ss.str().c_str());
+    utils::file::write(ConfigStore::getInstance()->getString("LOG_DIR").c_str(), ss.str().c_str());
 #endif
 
 #if defined(LOG_DLT)
@@ -77,7 +77,7 @@ void Log::out(LogLevel lv, const char* fileName, const unsigned long line, const
         ss << " " << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned>(buf[i]);
 #if defined(LOG_FILE)
     ss << '\n';
-    utils::file::write(LOG_DIRECTORY, ss.str().c_str());
+    utils::file::write(ConfigStore::getInstance()->getString("LOG_DIR").c_str(), ss.str().c_str());
 #endif
 
 #if defined(LOG_DLT)

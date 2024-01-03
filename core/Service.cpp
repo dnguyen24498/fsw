@@ -34,6 +34,7 @@ void Service::destroy() {
 
 int32_t Service::plug() {
     mServiceHub->add(std::dynamic_pointer_cast<Service>(shared_from_this()));
+    return getId();
 }
 
 void Service::receive(std::shared_ptr<Message> &message) {
