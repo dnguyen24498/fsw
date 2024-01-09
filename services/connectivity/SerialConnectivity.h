@@ -12,13 +12,13 @@
 
 class SerialConnectivity final : public Service {
 public:
-    SerialConnectivity(const std::string &name, ServiceHub *hub);
+    SerialConnectivity(const std::string& name, ServiceHub* hub);
     virtual ~SerialConnectivity();
 
 private:
     void init() override;
     void registerMessage() override;
-    void handleMessage(std::shared_ptr<Message> &message) override;
+    void handleMessage(std::shared_ptr<Message>& message) override;
     void receive();
     void transmit();
     

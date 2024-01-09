@@ -16,29 +16,29 @@ enum class LogLevel : uint8_t {
 
 class ILogger {
 public:
-    using Ptr = std::shared_ptr<ILogger>;
-    virtual ~ILogger() = default;
-    virtual void out(LogLevel lv, const char* str) = 0;
+  using Ptr = std::shared_ptr<ILogger>;
+  virtual ~ILogger() = default;
+  virtual void out(LogLevel lv, const char* str) = 0;
 };
 
 class Log {
 public:
-    static Log* getInstance();
-    void registerService(ILogger::Ptr logger) noexcept;
-    void out(LogLevel lv, const char* format, ...) noexcept;
-    void out(LogLevel lv, const char* fileName, const unsigned long line, const char* func, const char* text, const uint8_t buf[], unsigned int size) noexcept;
+  static Log* getInstance();
+  void registerService(ILogger::Ptr logger) noexcept;
+  void out(LogLevel lv, const char* format, ...) noexcept;
+  void out(LogLevel lv, const char* fileName, const unsigned long line, const char* func, const char* text, const uint8_t buf[], unsigned int size) noexcept;
 private:
-    Log() = default;
-    ~Log() = default;
-    std::vector<ILogger::Ptr> mLoggers;
-    static constexpr uint64_t BUF_SIZE = 1024;
+  Log() = default;
+  ~Log() = default;
+  std::vector<ILogger::Ptr> mLoggers;
+  static constexpr uint64_t BUF_SIZE = 1024;
 };
 
 class Logger : public ILogger {
 public:
-    Logger() = default;
-    virtual ~Logger() = default;
-    virtual void out(LogLevel lv, const char* str) noexcept;
+  Logger() = default;
+  virtual ~Logger() = default;
+  virtual void out(LogLevel lv, const char* str) noexcept;
 };
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)

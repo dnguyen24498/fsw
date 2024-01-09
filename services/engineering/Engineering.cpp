@@ -2,17 +2,15 @@
 #include "ServiceHub.h"
 #include "Log.h"
 #include "ConfigStore.h"
+#include "Utils.h"
 
 #include <unistd.h>
 #include <iostream>
 
-std::string PORT_NAME = ConfigStore::getInstance()->getString("PORT_NAME");
-int ENGINEERING_PORT_BAUDRATE = ConfigStore::getInstance()->getInt("ENGINEERING_PORT_BAUDRATE");
-int FRAME_BUFFER_SIZE = ConfigStore::getInstance()->getInt("FRAME_BUFFER_SIZE");
-
-extern "C" void __init__(ServiceHub *hub) {
+extern "C" std::string __init__(ServiceHub *hub) {
     std::shared_ptr<Engineering> service = std::make_shared<Engineering>("Engineering", hub);
     service->plug();
+    return service->getName();
 }
 
 Engineering::Engineering(const std::string &name, ServiceHub *hub)
@@ -21,7 +19,8 @@ Engineering::Engineering(const std::string &name, ServiceHub *hub)
     
 }
 
-Engineering::~Engineering() {   
+Engineering::~Engineering() {
+    mEngineering = false;
     mUart->close();
 }
 
@@ -35,6 +34,9 @@ void Engineering::registerMessage() {
 }
 
 void Engineering::startEngineeringMode() {
+    std::string PORT_NAME = ConfigStore::getInstance()->getString("PORT_NAME");
+    int ENGINEERING_PORT_BAUDRATE = ConfigStore::getInstance()->getInt("ENGINEERING_PORT_BAUDRATE");
+  
     if (mUart->open(PORT_NAME.c_str(), ENGINEERING_PORT_BAUDRATE) != -1) {
         LOG_INFO("Serial port %s opened (Engineering)", PORT_NAME.c_str());
         mEngineering = true;
@@ -53,7 +55,9 @@ void Engineering::receive() {
     
     tvTimeout.tv_sec = 0;
     tvTimeout.tv_usec = 2000;
-    
+
+    int FRAME_BUFFER_SIZE = ConfigStore::getInstance()->getInt("FRAME_BUFFER_SIZE");
+  
     uint8_t buff[FRAME_BUFFER_SIZE] = {0};
     bool dataAvailable = false;
     
@@ -74,7 +78,7 @@ void Engineering::receive() {
             
             int32_t ret = select(mUart->getFd() + 1, &fsRead, 
                 nullptr, nullptr, &tvTimeout);
-            
+            if (!mEngineering) return;
             if (ret == -1) break;
             else if (ret == 0) continue;
             else dataAvailable = true;
@@ -128,33 +132,15 @@ void Engineering::executeCommand(const std::string &command) {
         mEngineering = false;
         mUart->close();
         
-        std::shared_ptr<Message> msg = Message::obtain(shared_from_this(), MSG_START_NORMAL_MODE);
-        sendToHub(msg);
-        
-        return;
-    }
-    
-    FILE* pipe = popen(command.c_str(), "r");
-    
-    if (!pipe) {
-        LOG_ERROR("Failed to execute the command");
+        Message::obtain(shared_from_this(), MSG_START_NORMAL_MODE)->sendToHub();
         return;
     }
 
-    char buffer[FRAME_BUFFER_SIZE];
-    std::string currentLine;
-    
-    while (fgets(buffer, FRAME_BUFFER_SIZE, pipe) != nullptr) {
-        currentLine += buffer;
-        if (currentLine.back() == '\n') {
-            currentLine += '\r';
-            mUart->write(currentLine);
-            
-            currentLine.clear();
-        }
+    for (auto s : utils::io::execute(command)) {
+      uint8_t tmp = static_cast<uint8_t>(s);
+      if (s == '\n') mUart->write("\r");
+      mUart->write(&s, 1);
     }
-
-    pclose(pipe);
 }
 
 void Engineering::handleMessage(std::shared_ptr<Message> &message) {

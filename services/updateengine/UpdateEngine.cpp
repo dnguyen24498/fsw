@@ -12,9 +12,10 @@ std::string PORT_NAME = ConfigStore::getInstance()->getString("PORT_NAME");
 int UPDATE_PORT_BAUDRATE = ConfigStore::getInstance()->getInt("UPDATE_PORT_BAUDRATE");
 int FRAME_BUFFER_SIZE = ConfigStore::getInstance()->getInt("FRAME_BUFFER_SIZE");
 
-extern "C" void __init__(ServiceHub *hub) {
+extern "C" std::string __init__(ServiceHub *hub) {
     std::shared_ptr<UpdateEngine> service = std::make_shared<UpdateEngine>("UpdateEngine", hub);
     service->plug();
+    return service->getName();
 }
 
 UpdateEngine::UpdateEngine(const std::string &name, ServiceHub *hub)
@@ -128,8 +129,7 @@ void UpdateEngine::receive() {
     outputFile.close();
     mUart->close();
     
-    std::shared_ptr<Message> out = Message::obtain(shared_from_this(), MSG_START_NORMAL_MODE);
-    sendToHub(out);
+    Message::obtain(shared_from_this(), MSG_START_NORMAL_MODE)->sendToHub();
 }
 
 void UpdateEngine::handleMessage(std::shared_ptr<Message> &message) {

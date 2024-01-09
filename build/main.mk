@@ -2,11 +2,11 @@ TARGET := fsw
 
 PROJECT_VERSION_MAJOR := 1
 PROJECT_VERSION_MINOR := 0
-PROJECT_VERSION_PATCH := 1
+PROJECT_VERSION_PATCH := 2
 
 BUILD_ROOT := build/out
 BUILD_INCLUDE := build/include
-DEFAULT_CONFIG := /home/ubuntu/environment/fsw/.config
+DEFAULT_CONFIG := /home/runner/fsw/.config
 
 FSW_SRCS := $(wildcard init/*.cpp)
 FSW_OBJS := $(FSW_SRCS:.cpp=.o)
@@ -26,9 +26,12 @@ all: $(TARGET)
 
 include core/core.mk
 include services/services.mk
+include test/test.mk
 
 $(TARGET): core headers $(IMPORT_SERVICES) $(FSW_OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(FSW_OBJS) $(FSW_CORE_LIB_OBJS)
+
+services: $(IMPORT_SERVICES)
 
 init/%.o: init/%.cpp
 	$(CXX) $(CXXFLAGS) -c -fPIC $< -o $@ -I$(BUILD_INCLUDE)

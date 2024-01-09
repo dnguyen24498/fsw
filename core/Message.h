@@ -9,25 +9,22 @@
 #include <string>
 
 class Service;
-
-class Message {
+class Message : public std::enable_shared_from_this<Message> {
 public:
-    Message();
-    virtual ~Message();
-    
-    static std::shared_ptr<Message> obtain(const std::shared_ptr<Service> &sender, const message_id &id);
-    static std::shared_ptr<Message> obtainAutoMapId(const std::shared_ptr<Service> &sender, const uint8_t *data, const uint32_t len);
-    
-    void append(const std::string &data);
-    void append(const uint8_t *data, const uint32_t len);
-    
-    std::string getString();
-    void getRaw(uint8_t *buffer, uint32_t &len);
-    
-    void clear();
+  Message();
+  virtual ~Message();
+  
+  static std::shared_ptr<Message> obtain(const std::shared_ptr<Service> &sender, const message_id &id);
+  static std::shared_ptr<Message> obtainAutoMapId(const std::shared_ptr<Service> &sender, const uint8_t *data, const uint32_t len);
+  void sendToHub();
+  void append(const std::string &data);
+  void append(const uint8_t *data, const uint32_t len);
+  std::string getString();
+  void getRaw(uint8_t *buffer, uint32_t &len);
+  void clear();
     
 public:
-    message_id id;
-    std::vector<uint8_t> bytes;
-    std::shared_ptr<Service> sender;
+  message_id id;
+  std::vector<uint8_t> bytes;
+  std::shared_ptr<Service> sender;
 };

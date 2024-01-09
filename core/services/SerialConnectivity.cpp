@@ -7,17 +7,6 @@
 #include <unistd.h>
 #include <iostream>
 
-std::string PORT_NAME = ConfigStore::getInstance()->getString("PORT_NAME");
-int NORAL_PORT_BAUDRATE = ConfigStore::getInstance()->getInt("NORMAL_PORT_BAUDRATE");
-int FRAME_BUFFER_SIZE = ConfigStore::getInstance()->getInt("FRAME_BUFFER_SIZE");
-
-extern "C" std::string __init__(ServiceHub *hub) {
-	 std::shared_ptr<SerialConnectivity> service 
-		= std::make_shared<SerialConnectivity>("SerialConnectivity", hub);
-	 service->plug();
-   return service->getName();
-}
-
 SerialConnectivity::SerialConnectivity(const std::string &name, ServiceHub *hub) 
  : Service(name, hub), mReceiveThread(nullptr), mIsNormalMode(true), mPrintPrefix(false),
  mTransmitThread(nullptr), mUart(std::make_unique<Uart>()) {
@@ -31,29 +20,29 @@ SerialConnectivity::~SerialConnectivity() {
 }
 
 void SerialConnectivity::init() {
-	 if (mUart->open(PORT_NAME.c_str(), NORAL_PORT_BAUDRATE) != -1) {
-			LOG_INFO("Serial port %s opened (Normal)", PORT_NAME.c_str());
-			mIsNormalMode = true;
+  if (mUart->open(ConfigStore::getInstance()->getString("PORT_NAME").c_str(), 
+    ConfigStore::getInstance()->getInt("NORMAL_PORT_BAUDRATE")) != -1) {
+		LOG_INFO("Normal port opnened");
+		mIsNormalMode = true;
 			
-			mReceiveThread = std::unique_ptr<std::thread>
-				(new std::thread(&SerialConnectivity::receive, this));
-			mReceiveThread->detach();
-			
-			mTransmitThread = std::unique_ptr<std::thread>
-				(new std::thread(&SerialConnectivity::transmit, this));
-			mTransmitThread->detach();
+		mReceiveThread = std::unique_ptr<std::thread>
+			(new std::thread(&SerialConnectivity::receive, this));
+		mReceiveThread->detach();
+		
+		mTransmitThread = std::unique_ptr<std::thread>
+			(new std::thread(&SerialConnectivity::transmit, this));
+		mTransmitThread->detach();
 	 } else {
-			LOG_ERROR("Fail to open %s port", PORT_NAME.c_str());
+		LOG_ERROR("Fail to open normal port");
 	 }
 }
 
 void SerialConnectivity::registerMessage() {
-	 // Register messages
-	 mServiceHub->registerMessage(MSG_TEST_REPONSE, 
-			std::dynamic_pointer_cast<Service>(shared_from_this()));
-			
-	 mServiceHub->registerMessage(MSG_START_NORMAL_MODE, 
-			std::dynamic_pointer_cast<Service>(shared_from_this()));
+	// Register messages
+	mServiceHub->registerMessage(MSG_TEST_REPONSE, 
+    std::dynamic_pointer_cast<Service>(shared_from_this()));		
+	mServiceHub->registerMessage(MSG_START_NORMAL_MODE, 
+    std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
 
 void SerialConnectivity::receive() {
@@ -63,7 +52,7 @@ void SerialConnectivity::receive() {
 	 tvTimeout.tv_sec = 0;
 	 tvTimeout.tv_usec = 2000;
 	 
-	 uint8_t buff[FRAME_BUFFER_SIZE] = {0};
+	 uint8_t buff[ConfigStore::getInstance()->getInt("FRAME_BUFFER_SIZE")] = {0};
 	 bool dataAvailable = false;
 	 
 	 while (mIsNormalMode) {
@@ -115,7 +104,7 @@ void SerialConnectivity::transmit() {
 			}
 			
 			if (!mTransmitQueue.empty()) {
-				uint8_t buff[FRAME_BUFFER_SIZE] = {0};
+				uint8_t buff[ConfigStore::getInstance()->getInt("FRAME_BUFFER_SIZE")] = {0};
 				uint32_t len = 0;
 				
 				mTransmitQueue.front()->getRaw(buff, len);

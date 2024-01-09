@@ -12,6 +12,7 @@
 *.obj
 fsw
 fsw_log.txt
+build/include/*
 
 # Precompiled Headers
 *.gch
@@ -21,7 +22,7 @@ fsw_log.txt
 *.so
 *.dylib
 *.dll
-*.fo
+build/out/*.fo
 
 # Fortran module files
 *.mod
