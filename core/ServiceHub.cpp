@@ -4,6 +4,7 @@
 #include "SerialConnectivity.h"
 #include "Engineering.h"
 #include "UpdateEngine.h"
+#include "Message.h"
 
 #include <unistd.h>
 #include <algorithm>
@@ -133,19 +134,19 @@ void ServiceHub::loadDynamicServices() {
   dirent* entry;
 
   if (dir == nullptr) {
-      LOG_ERROR("Error opening %s directory", directory.c_str());
-      return;
+    LOG_ERROR("Error opening %s directory", directory.c_str());
+    return;
   }
 
   while ((entry = readdir(dir)) != nullptr) {
-      if (entry->d_type == DT_REG) {  // Check if it is a regular file
-          std::string filename = entry->d_name;
-          size_t extPos = filename.find_last_of(".");
-          if (extPos != std::string::npos && filename.substr(extPos) 
-              == ConfigStore::getInstance()->getString("FO_EXTENSION")) {
-              fos.push_back(directory + '/' + filename);
-          }
+    if (entry->d_type == DT_REG) {  // Check if it is a regular file
+      std::string filename = entry->d_name;
+      size_t extPos = filename.find_last_of(".");
+      if (extPos != std::string::npos && filename.substr(extPos) 
+          == ConfigStore::getInstance()->getString("FO_EXTENSION")) {
+          fos.push_back(directory + '/' + filename);
       }
+    }
   }
   
   closedir(dir);

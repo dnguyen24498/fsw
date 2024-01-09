@@ -14,22 +14,11 @@ std::shared_ptr<Message> Message::obtain(const std::shared_ptr<Service> &sender,
   return m;
 }
 
-std::shared_ptr<Message> Message::obtainAutoMapId(const std::shared_ptr<Service> &sender, const uint8_t *data, const uint32_t len) {
+std::shared_ptr<Message> Message::obtain(const std::shared_ptr<Service> &sender, const message_id &id, const uint8_t *data, const uint32_t &len) {
   std::shared_ptr<Message> m = std::make_shared<Message>();
-    
-  if (len >= STD_MIN_LEN) {
-    m->id = static_cast<message_id>(((data[STD_MODULE1_OFF] << 8) | 
-      data[STD_MODULE2_OFF]) << 8 | data[STD_MODULE3_OFF]);
-    
-    int32_t dataLen = static_cast<int32_t>(data[STD_USR_LEN_LO_OFF] << 8) | data[STD_USR_LEN_HI_OFF];
-    
-    if (dataLen > 0) {
-      for (int i = 0; i < dataLen; i++) {
-        m->append(&data[STD_USR_DATA_OFF + i], 1);
-      }
-    }
-  }
+  m->id = id;
   m->sender = sender;
+  m->append(data, len);
   return m;
 }
 
@@ -43,7 +32,7 @@ void Message::append(const std::string &data) {
   }
 }
 
-void Message::append(const uint8_t *data, const uint32_t len) {
+void Message::append(const uint8_t *data, const uint32_t &len) {
   for (int i = 0; i < len; ++i) {
     bytes.push_back(data[i]);   
   }

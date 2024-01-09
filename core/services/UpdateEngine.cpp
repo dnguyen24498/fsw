@@ -37,7 +37,6 @@ void UpdateEngine::startUpdateMode() {
   }
 }
 
-
 char UpdateEngine::calculateChecksum(const XmodemPacket &packet) {
   char crc = 0;
   crc += packet.blockNumber;

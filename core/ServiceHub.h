@@ -1,7 +1,7 @@
 #pragma once
 
+#include "MessageMap.h"
 #include "Service.h"
-#include "Message.h"
 
 #include <memory>
 #include <unordered_map>

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Service.h"
+#include "Message.h"
+
 #define STD_SOP1                0x4B
 #define STD_SOP2                0x55
 #define STD_RESERVED1           0x00
@@ -25,11 +28,13 @@
 
 #define STD_MIN_LEN             17
 
-enum message_id {
-  MSG_TEST_REQUEST = 0,
-  MSG_TEST_REPONSE,
-  MSG_START_NORMAL_MODE = 16777213,       /* Enter normal mode */
-  MSG_START_ENGINEERING_MODE = 16777214,  /* Enter engineering mode */
-  MSG_START_UPDATE_MODE = 16777215,       /* Enter update mode */
-  MSG_UNDEFINED
+class HKMCHandler final : public Service {
+public:
+  HKMCHandler(const std::string& name, ServiceHub* hub);
+  virtual ~HKMCHandler();
+
+private:
+  void init() override;
+  void registerMessage() override;
+  void handleMessage(std::shared_ptr<Message>& message) override;
 };

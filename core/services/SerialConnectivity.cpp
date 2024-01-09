@@ -2,7 +2,7 @@
 #include "Log.h"
 #include "ConfigStore.h"
 #include "ServiceHub.h"
-#include "MessageTable.h"
+#include "MessageMap.h"
 
 #include <unistd.h>
 #include <iostream>
@@ -39,7 +39,7 @@ void SerialConnectivity::init() {
 
 void SerialConnectivity::registerMessage() {
 	// Register messages
-	mServiceHub->registerMessage(MSG_TEST_REPONSE, 
+	mServiceHub->registerMessage(MSG_SERIAL_REPONSE, 
     std::dynamic_pointer_cast<Service>(shared_from_this()));		
 	mServiceHub->registerMessage(MSG_START_NORMAL_MODE, 
     std::dynamic_pointer_cast<Service>(shared_from_this()));
@@ -72,7 +72,7 @@ void SerialConnectivity::receive() {
 			
 			if (bytesRead < 1) continue;
 			
-			mReceiveQueue.push(Message::obtainAutoMapId(shared_from_this(), buff, bytesRead));
+			mReceiveQueue.push(Message::obtain(shared_from_this(), MSG_SERIAL_REQUEST, buff, bytesRead));
 			mCondition.notify_one();
 			
 			dataAvailable = false;
@@ -87,18 +87,22 @@ void SerialConnectivity::transmit() {
 				
 			if (!mReceiveQueue.empty()) {
 				std::shared_ptr<Message> msg = mReceiveQueue.front();
-				if (msg->id == MSG_START_ENGINEERING_MODE) {
-					 LOG_INFO("Entering Engineering mode");
-					 mIsNormalMode = false;
-					 mUart->close();
-				} else if (msg->id == MSG_START_UPDATE_MODE) {
-					 LOG_INFO("Entering Update mode");
-					 mIsNormalMode = false;
-					 mUart->close();
-				} else {
-					 mIsNormalMode = true;
-				}
-				
+        if (msg->bytes.size() == 3) {
+          if (msg->bytes[0] == 0xFF && msg->bytes[1] == 0xFF &&  msg->bytes[2] == 0xFE) {
+            LOG_INFO("Entering Engineering mode");
+            msg->id = MSG_START_ENGINEERING_MODE;
+            mIsNormalMode = false;
+            mUart->close();
+          } else if (msg->bytes[0] == 0xFF && msg->bytes[1] == 0xFF && msg->bytes[2] == 0xFF) {
+            LOG_INFO("Entering Update mode");
+            msg->id = MSG_START_UPDATE_MODE;
+            mIsNormalMode = false;
+            mUart->close();
+          } else {
+            LOG_ERROR("Unknown mode");
+          }
+        }
+        
 				sendToHub(msg);
 				mReceiveQueue.pop();   
 			}
@@ -120,7 +124,7 @@ void SerialConnectivity::handleMessage(std::shared_ptr<Message> &message) {
 				init();
 				break;
 				
-			case MSG_TEST_REPONSE:
+			case MSG_SERIAL_REPONSE:
 				mTransmitQueue.push(message);
 				mCondition.notify_one();
 				break;
