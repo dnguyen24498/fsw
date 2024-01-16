@@ -40,7 +40,7 @@ private:
   std::condition_variable mCondition;
   std::unordered_map<std::string, std::shared_ptr<Service>> mServiceMap;
   std::unordered_map<int32_t, std::vector<std::string>> mMessageRegistrantMap;
-  std::unordered_map<std::string, void*> mLoadingLibraryMap;
-  std::queue<std::shared_ptr<Message>> mMessageQueue;
+  std::unordered_map<std::string, void*> mDynamicLibraryMap;
+  std::priority_queue<std::shared_ptr<Message>> mMessageQueue;
   volatile bool isRunning;
 };

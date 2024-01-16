@@ -57,7 +57,9 @@ int32_t Service::getId() {
 	return static_cast<int32_t>(hasher(mThread->get_id()));
 }
 
-void Service::sendToHub(const std::shared_ptr<Message> &message) {
+void Service::sendToHub(const std::shared_ptr<Message> &message, uint64_t delay) {
+  message->timestamp = utils::time::uptimeMillis() + delay;
+  //LOG_INFO("Timestamp is: %d", message->timestamp);
 	mServiceHub->notify(message);
 }
 
@@ -69,8 +71,12 @@ void Service::loop() {
 		if (!mMessageQueue.empty()) {
 			std::shared_ptr<Message> msg = mMessageQueue.front();
 			mMessageQueue.pop();
-      
-			handleMessage(msg);
+
+      try {
+        handleMessage(msg);
+      } catch(const std::exception& e) {
+        LOG_ERROR("Exception: %s", e.what());
+      }
 		}
 	}
 }

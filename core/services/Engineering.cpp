@@ -113,9 +113,8 @@ void Engineering::receive() {
   }
 }
 
-void Engineering::executeCommand(const std::string &command) {
-  LOG_INFO("Executing command: %s", command.c_str());
-    
+void Engineering::executeCommand(std::string &command) {
+  // Handle special commands first
   if (command == "exit" || command == "quit") {
     LOG_INFO("Entering Normal mode");
     mEngineering = false;
@@ -125,6 +124,12 @@ void Engineering::executeCommand(const std::string &command) {
     return;
   }
 
+  if (command == "log") {
+    command = "cat " + ConfigStore::getInstance()->getString("LOG_DIR");
+  }
+
+  LOG_INFO("Executing command: %s", command.c_str());
+  
   for (auto s : utils::io::execute(command)) {
     uint8_t tmp = static_cast<uint8_t>(s);
     if (s == '\n') mUart->write("\r");

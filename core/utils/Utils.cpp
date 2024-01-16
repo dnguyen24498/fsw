@@ -91,5 +91,11 @@ namespace utils {
 
       return ss.str();
     }
+
+    uint64_t uptimeMillis() {
+      auto now = std::chrono::system_clock::now();
+      auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+      return dur.count();
+    }
   }
 }

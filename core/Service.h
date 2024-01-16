@@ -11,6 +11,14 @@
 
 class Message;
 class ServiceHub;
+
+template <typename T>
+std::string DYNAMIC_REGISTER(const std::string &name, ServiceHub *hub) {
+  std::shared_ptr<T> service = std::make_shared<T>(name, hub);
+  service->plug();
+  return service->getName();
+}
+
 class Service : public std::enable_shared_from_this<Service> {
 public:
   Service(const std::string &name, ServiceHub* hub);
@@ -21,7 +29,7 @@ public:
   std::string getName();
   int32_t run();
   void destroy();
-  void sendToHub(const std::shared_ptr<Message> &message);
+  void sendToHub(const std::shared_ptr<Message> &message, uint64_t delay = 0);
   void receive(const std::shared_ptr<Message> &message);
   virtual void init();
   virtual void loop();

@@ -22,17 +22,18 @@ void registerSignal(void) {
       signal(i, [](int signum) {
           LOG_ERROR("Signal received: %d - %s", signum, strsignal(signum));
           if (signum != SIGINT && signum != SIGCHLD) {
-              LOG_ERROR("========================= Crashed here =========================");
-              void* callstack[1024];
-              int numFrames = backtrace(callstack, sizeof(callstack) / sizeof(callstack[0]));
-              char** symbols = backtrace_symbols(callstack, numFrames);
+              LOG_ERROR("========================= fsw crashed =========================");
+              const int maxStackTraceSize = 16;
+              void* stackTrace[maxStackTraceSize];
+              int stackTraceSize = backtrace(stackTrace, maxStackTraceSize);
+              char** symbols = backtrace_symbols(stackTrace, stackTraceSize);
 
-              if (symbols != nullptr) {
-                  for (int i = 0; i < numFrames; ++i) {
-                      printf("%s\n", symbols[i]);
-                  }
-                  free(symbols);
+              std::cout << "Stack Trace:" << std::endl;
+              for (int i = 0; i < stackTraceSize; ++i) {
+                  std::cout << symbols[i] << std::endl;
               }
+
+              free(symbols);
           }
           signal(signum, SIG_DFL);
           raise(signum);   
@@ -56,7 +57,7 @@ int main() {
   Log::getInstance()->registerService(std::make_shared<Logger>());
 #endif
 
-  LOG_INFO("Version: %d.%d.%d", PROJECT_VERSION_MAJOR, 
+  LOG_INFO("Factory Software version: %d.%d.%d", PROJECT_VERSION_MAJOR, 
       PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
 
   registerSignal();

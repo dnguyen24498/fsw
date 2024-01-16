@@ -5,6 +5,7 @@
 #include "Engineering.h"
 #include "UpdateEngine.h"
 #include "Message.h"
+#include "Utils.h"
 
 #include <unistd.h>
 #include <algorithm>
@@ -46,14 +47,18 @@ void ServiceHub::start() {
     if (mMessageQueue.empty()) {
         mCondition.wait(lock);
     }
-      
-    std::shared_ptr<Message> msg = mMessageQueue.front();
+    
+    std::shared_ptr<Message> msg = mMessageQueue.top();
+    if (msg->timestamp > utils::time::uptimeMillis()) {
+      usleep(500);
+      continue;
+    }
       
     if (mMessageRegistrantMap.find(msg->id) != mMessageRegistrantMap.end()) {
       for (auto service : mMessageRegistrantMap[msg->id]) {
         // Send to all registrants
         if (mServiceMap.find(service) != mServiceMap.end()) {
-          LOG_INFO("Send message %d from %s to %s", msg->id, msg->sender->getName().c_str(), service.c_str());
+          LOG_INFO("Send %s message from %s to %s", getMessageName(msg->id).c_str(), msg->sender->getName().c_str(), service.c_str());
           mServiceMap[service]->receive(msg);
         } else {
           LOG_ERROR("Service %s was unplugged from message registrant map", service.c_str());
@@ -83,12 +88,12 @@ void ServiceHub::remove(const std::string &name) {
     usleep(500);
   }
   
-  if (mLoadingLibraryMap.find(name) != mLoadingLibraryMap.end()) {
-    if (mLoadingLibraryMap[name] != nullptr) {
-      LOG_INFO("Unloading %s service file", name.c_str());
-      dlclose(mLoadingLibraryMap[name]);
+  if (mDynamicLibraryMap.find(name) != mDynamicLibraryMap.end()) {
+    if (mDynamicLibraryMap[name] != nullptr) {
+      LOG_INFO("Unloading %s service", name.c_str());
+      dlclose(mDynamicLibraryMap[name]);
     }
-    mLoadingLibraryMap.erase(name);
+    mDynamicLibraryMap.erase(name);
   }
 }
 
@@ -157,13 +162,13 @@ void ServiceHub::loadDynamicServices() {
     if (!library) {
       LOG_ERROR("Failed to load the library: %s", dlerror());
     } else {
-      CreateServicePtr createService = reinterpret_cast<CreateServicePtr>(dlsym(library, "__init__"));
+      CreateServicePtr initService = reinterpret_cast<CreateServicePtr>(dlsym(library, "__init__"));
 
-      if (!createService) {
+      if (!initService) {
         LOG_ERROR("Failed to load the symbols: %s", dlerror());
         dlclose(library);
       } else {
-        mLoadingLibraryMap[createService(ServiceHub::getInstance())] = library;
+        mDynamicLibraryMap[initService(ServiceHub::getInstance())] = library;
       }
     }
   }

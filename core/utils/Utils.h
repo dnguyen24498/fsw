@@ -12,5 +12,6 @@ namespace utils {
 
   namespace time {
     std::string now(void);
+    uint64_t uptimeMillis();
   }
 }

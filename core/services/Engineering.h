@@ -17,7 +17,7 @@ private:
   void startEngineeringMode();
   void receive();
   
-  void executeCommand(const std::string &command);
+  void executeCommand(std::string &command);
 
 private:
   std::unique_ptr<Uart> mUart;

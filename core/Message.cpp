@@ -1,4 +1,5 @@
 #include "Message.h"
+#include "Utils.h"
 
 Message::Message()
   : id(MSG_UNDEFINED) {
@@ -22,8 +23,8 @@ std::shared_ptr<Message> Message::obtain(const std::shared_ptr<Service> &sender,
   return m;
 }
 
-void Message::sendToHub() {
-  sender->sendToHub(shared_from_this());
+void Message::sendToHub(uint64_t delay) {
+  sender->sendToHub(shared_from_this(), delay);
 }
 
 void Message::append(const std::string &data) {

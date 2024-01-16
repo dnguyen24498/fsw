@@ -21,7 +21,7 @@ SerialConnectivity::~SerialConnectivity() {
 
 void SerialConnectivity::init() {
   if (mUart->open(ConfigStore::getInstance()->getString("PORT_NAME").c_str(), 
-    ConfigStore::getInstance()->getInt("NORMAL_PORT_BAUDRATE")) != -1) {
+      ConfigStore::getInstance()->getInt("NORMAL_PORT_BAUDRATE")) != -1) {
 		LOG_INFO("Normal port opnened");
 		mIsNormalMode = true;
 			
@@ -104,7 +104,7 @@ void SerialConnectivity::transmit() {
         }
         
 				sendToHub(msg);
-				mReceiveQueue.pop();   
+				mReceiveQueue.pop();
 			}
 			
 			if (!mTransmitQueue.empty()) {
