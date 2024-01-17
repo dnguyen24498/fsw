@@ -22,8 +22,8 @@ void Engineering::init() {
     
 }
 
-void Engineering::registerMessage() {
-  mServiceHub->registerMessage(MSG_START_ENGINEERING_MODE,
+void Engineering::subscribeMessage() {
+  mServiceHub->subscribeMessage(MSG_START_ENGINEERING_MODE,
     std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
 
@@ -142,7 +142,11 @@ void Engineering::handleMessage(std::shared_ptr<Message> &message) {
     case MSG_START_ENGINEERING_MODE:
       startEngineeringMode();
       break;
-        
+    
+    case MSG_HEARTBEAT_CHECK:
+      LOG_INFO("Heartbeating...");
+      break;
+    
     default:
       break;
   }

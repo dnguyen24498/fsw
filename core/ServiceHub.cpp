@@ -16,7 +16,7 @@ typedef std::string (*CreateServicePtr)(ServiceHub*);
 ServiceHub* ServiceHub::mInstance = nullptr;
 
 ServiceHub::ServiceHub()
-  : isRunning(true) {
+  : isRunning(true), mMonitoringThread(nullptr) {
 }
 
 ServiceHub::~ServiceHub() {
@@ -39,9 +39,13 @@ void ServiceHub::init() {
   
   LOG_INFO("Loading dynamic services...");
   loadDynamicServices();
+
+  mMonitoringThread = std::unique_ptr<std::thread>(new std::thread(&ServiceHub::monitor, this));
 }
 
 void ServiceHub::start() {
+  mMonitoringThread->detach();
+  
   while (isRunning) {
     std::unique_lock<std::mutex> lock(mLock);
     if (mMessageQueue.empty()) {
@@ -58,7 +62,8 @@ void ServiceHub::start() {
       for (auto service : mMessageRegistrantMap[msg->id]) {
         // Send to all registrants
         if (mServiceMap.find(service) != mServiceMap.end()) {
-          LOG_INFO("Send %s message from %s to %s", getMessageName(msg->id).c_str(), msg->sender->getName().c_str(), service.c_str());
+          LOG_INFO("Send %s message from %s to %s", getMessageName(msg->id).c_str(), 
+              msg->sender->getName().c_str(), service.c_str());
           mServiceMap[service]->receive(msg);
         } else {
           LOG_ERROR("Service %s was unplugged from message registrant map", service.c_str());
@@ -76,7 +81,8 @@ void ServiceHub::add(const std::shared_ptr<Service> &service) {
     LOG_INFO("%s service was plugged", service->getName().c_str());
     mServiceMap[service->getName()] = service;
     mServiceMap[service->getName()]->init();
-    mServiceMap[service->getName()]->registerMessage();
+    mServiceMap[service->getName()]->subscribeMessage();
+    subscribeMessage(MSG_HEARTBEAT_CHECK, service);
     mServiceMap[service->getName()]->run();
   }
 }
@@ -110,11 +116,23 @@ void ServiceHub::notify(const std::shared_ptr<Message> &message) {
   mCondition.notify_one();
 }
 
-void ServiceHub::registerMessage(message_id id, const std::shared_ptr<Service> &service) {
-  auto it = std::find(mMessageRegistrantMap[id].begin(), mMessageRegistrantMap[id].end(), service->getName());
+void ServiceHub::subscribeMessage(message_id id, const std::shared_ptr<Service> &service) {
+  auto it = std::find(mMessageRegistrantMap[id].begin(), 
+    mMessageRegistrantMap[id].end(), service->getName());
   
   if (it == mMessageRegistrantMap[id].end()) {
     mMessageRegistrantMap[id].push_back(service->getName());
+  }
+}
+
+void ServiceHub::monitor() {
+  while (isRunning) {
+    for (auto it = mServiceMap.begin(); it != mServiceMap.end(); it++) {
+      std::shared_ptr<Message> msg = std::make_shared<Message>();
+      msg->id = MSG_HEARTBEAT_CHECK;
+      it->second->receive(msg);
+    }
+    sleep(10);
   }
 }
 

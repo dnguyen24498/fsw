@@ -44,7 +44,7 @@ void Service::init() {
 		
 }
 
-void Service::registerMessage() {
+void Service::subscribeMessage() {
 		
 }
 
@@ -71,7 +71,7 @@ void Service::loop() {
 		if (!mMessageQueue.empty()) {
 			std::shared_ptr<Message> msg = mMessageQueue.front();
 			mMessageQueue.pop();
-
+      
       try {
         handleMessage(msg);
       } catch(const std::exception& e) {

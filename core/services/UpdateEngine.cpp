@@ -20,8 +20,8 @@ void UpdateEngine::init() {
     
 }
 
-void UpdateEngine::registerMessage() {
-  mServiceHub->registerMessage(MSG_START_UPDATE_MODE, 
+void UpdateEngine::subscribeMessage() {
+  mServiceHub->subscribeMessage(MSG_START_UPDATE_MODE, 
     std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
 
@@ -124,7 +124,11 @@ void UpdateEngine::handleMessage(std::shared_ptr<Message> &message) {
     case MSG_START_UPDATE_MODE:
       startUpdateMode();
       break;
-        
+    
+    case MSG_HEARTBEAT_CHECK:
+      LOG_INFO("Heartbeating...");
+      break;
+    
     default:
       break;
   }

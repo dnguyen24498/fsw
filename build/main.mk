@@ -19,13 +19,12 @@ CXXFLAGS := \
 	-DPROJECT_VERSION_PATCH=$(PROJECT_VERSION_PATCH)
 
 EXPORT_HEADERS :=
-IMPORT_SERVICES := \
-  hkmchandler.fo
+IMPORT_SERVICES :=
 
 all: $(TARGET)
 
 include core/core.mk
-include services/services.mk
+include loadable/services.mk
 include test/test.mk
 
 $(TARGET): core headers $(IMPORT_SERVICES) $(FSW_OBJS)

@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <string>
 #include <queue>
+#include <thread>
 #include <condition_variable>
 #include <vector>
 
@@ -26,17 +27,19 @@ public:
   void remove(const std::string &name);
   void removeAll();
   void notify(const std::shared_ptr<Message> &message);
-  void registerMessage(message_id id, const std::shared_ptr<Service> &service);
+  void subscribeMessage(message_id id, const std::shared_ptr<Service> &service);
 
 private:
   ServiceHub();
   virtual ~ServiceHub();
+  void monitor();
   void loadDefaultServices();
   void loadDynamicServices();
     
 private:
   static ServiceHub* mInstance;
   mutable std::mutex mLock;
+  std::unique_ptr<std::thread> mMonitoringThread;
   std::condition_variable mCondition;
   std::unordered_map<std::string, std::shared_ptr<Service>> mServiceMap;
   std::unordered_map<int32_t, std::vector<std::string>> mMessageRegistrantMap;

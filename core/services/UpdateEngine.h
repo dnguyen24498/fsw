@@ -26,7 +26,7 @@ public:
 
 private:
   void init() override;
-  void registerMessage() override;
+  void subscribeMessage() override;
   void handleMessage(std::shared_ptr<Message> &message) override;
   
   void startUpdateMode();

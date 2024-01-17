@@ -37,11 +37,11 @@ void SerialConnectivity::init() {
 	 }
 }
 
-void SerialConnectivity::registerMessage() {
+void SerialConnectivity::subscribeMessage() {
 	// Register messages
-	mServiceHub->registerMessage(MSG_SERIAL_REPONSE, 
+	mServiceHub->subscribeMessage(MSG_SERIAL_REPONSE, 
     std::dynamic_pointer_cast<Service>(shared_from_this()));		
-	mServiceHub->registerMessage(MSG_START_NORMAL_MODE, 
+	mServiceHub->subscribeMessage(MSG_START_NORMAL_MODE, 
     std::dynamic_pointer_cast<Service>(shared_from_this()));
 }
 
@@ -128,7 +128,10 @@ void SerialConnectivity::handleMessage(std::shared_ptr<Message> &message) {
 				mTransmitQueue.push(message);
 				mCondition.notify_one();
 				break;
-				
+
+     case MSG_HEARTBEAT_CHECK:
+        LOG_INFO("Heartbeating...");
+        break;
 			default:
 				break;
 	 }

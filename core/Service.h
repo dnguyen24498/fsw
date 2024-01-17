@@ -33,7 +33,7 @@ public:
   void receive(const std::shared_ptr<Message> &message);
   virtual void init();
   virtual void loop();
-  virtual void registerMessage();
+  virtual void subscribeMessage();
   virtual void handleMessage(std::shared_ptr<Message> &message);
 
 protected:
